@@ -1,0 +1,15 @@
+extends layout
+
+block content
+
+  h1 Item: #{item.name}
+  p Brand: #{item.brand.name}
+  p Price: #{item.price} $
+  p Number in stock: #{item.numberInStock} pieces
+  p Color print: #{`${item.colorPrint ? 'yes' : 'no'}`}
+
+    hr
+    p
+      a(href=item.url+'/delete') Delete Item
+    p
+      a(href=item.url+'/update') Update Item

@@ -1,0 +1,25 @@
+extends layout
+
+block content
+
+  h1 Brand: #{brand.name}
+  p #{brand.description}
+
+  div(style='margin-left:20px;margin-top:20px')
+
+    h4 Items
+
+    dl
+      each item in brandItems
+        dt
+          a(href=item.url) #{item.name}
+        dd #{item.description}
+
+      else
+        p This brand has no items
+
+    hr
+    p
+      a(href=brand.url+'/delete') Delete Brand
+    p
+      a(href=brand.url+'/update') Update Brand
