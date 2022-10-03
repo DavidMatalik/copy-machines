@@ -120,39 +120,47 @@ exports.brandUpdateGet = (req, res, next) => {
   })
 }
 
-exports.brandDeletePost = (req, res, next) => {
-  async.parallel(
-    {
-      brand(callback) {
-        Brand.findById(req.params.id).exec(callback)
+exports.brandDeletePost = [
+  body('password', 'Enter correct password').custom(
+    (value) => value === 'admin'
+  ),
+
+  (req, res, next) => {
+    async.parallel(
+      {
+        brand(callback) {
+          Brand.findById(req.params.id).exec(callback)
+        },
+        brandItems(callback) {
+          item.find({ brand: req.params.id }).exec(callback)
+        },
       },
-      brandItems(callback) {
-        item.find({ brand: req.params.id }).exec(callback)
-      },
-    },
-    (err, results) => {
-      if (err) {
-        return next(err)
-      }
-      if (results.brandItems.length > 0) {
-        // Brand has items. Render in same way as for GET route.
-        res.render('brandDelete', {
-          title: 'Delete Brand',
-          brand: results.brand,
-          brandItems: results.brandItems,
-        })
-        return
-      }
-      // Brand has no items. Delete object and redirect to the list of brands.
-      Brand.findByIdAndRemove(req.body.brandid, (err) => {
+      (err, results) => {
         if (err) {
           return next(err)
         }
-        res.redirect('/store/brands')
-      })
-    }
-  )
-}
+        const errors = validationResult(req)
+        if (results.brandItems.length > 0 || !errors.isEmpty()) {
+          // Brand has items. Render in same way as for GET route.
+          res.render('brandDelete', {
+            title: 'Delete Brand',
+            brand: results.brand,
+            brandItems: results.brandItems,
+            errors: errors.array(),
+          })
+          return
+        }
+        // Brand has no items. Delete object and redirect to the list of brands.
+        Brand.findByIdAndRemove(req.body.brandid, (err) => {
+          if (err) {
+            return next(err)
+          }
+          res.redirect('/store/brands')
+        })
+      }
+    )
+  },
+]
 
 exports.brandDeleteGet = (req, res, next) => {
   async.parallel(
